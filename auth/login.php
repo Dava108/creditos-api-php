@@ -1,7 +1,14 @@
 <?php
+
+session_start();
+
 error_reporting(E_ALL);
+
 ini_set('display_errors', 1);
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Credentials: true");
+
+
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 
@@ -22,6 +29,13 @@ $result = $stmt->get_result();
 if ($user = $result->fetch_assoc()) {
 
     if (password_verify($password, $user["password"])) {
+
+        $_SESSION['user'] = [
+            "id" => $user["id"],
+            "nombre" => $user["nombre"],
+            "numero_control" => $user["numero_control"],
+            "rol" => $user["rol"]
+        ];
 
         echo json_encode([
             "status" => "ok",
