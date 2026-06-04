@@ -1,6 +1,7 @@
 <?php
 
-function validarInscripcion($alumno_id, $horario_id, $conn) {
+function validarInscripcion($alumno_id, $horario_id, $conn)
+{
 
     // 1. CICLO ACTIVO Y FECHAS
     $sql = "SELECT id, fecha_inicio, fecha_fin 
@@ -23,8 +24,11 @@ function validarInscripcion($alumno_id, $horario_id, $conn) {
     // 2. DUPLICADO
     $stmt = $conn->prepare("
         SELECT id FROM inscripciones 
-        WHERE alumno_id = ? AND horario_id = ?
+        WHERE alumno_id = ?
+        AND horario_id = ?
+        AND estado = 'activa'
     ");
+
     $stmt->bind_param("ii", $alumno_id, $horario_id);
     $stmt->execute();
     $res = $stmt->get_result();
@@ -58,20 +62,21 @@ function validarInscripcion($alumno_id, $horario_id, $conn) {
 
     // 4. LIMITE POR TIPO (deportivo/cultural)
     $stmt = $conn->prepare("
-        SELECT COUNT(*) as total
-        FROM inscripciones i
-        INNER JOIN horarios h ON i.horario_id = h.id
-        INNER JOIN talleres t ON h.taller_id = t.id
-        WHERE i.alumno_id = ?
-        AND t.tipo = ?
-        AND t.ciclo_id = ?
-    ");
-    $stmt->bind_param("isi", $alumno_id, $horario['tipo'], $ciclo['id']);
+SELECT COUNT(*) as total
+FROM inscripciones i
+INNER JOIN horarios h ON i.horario_id = h.id
+INNER JOIN talleres t ON h.taller_id = t.id
+WHERE i.alumno_id = ?
+AND t.ciclo_id = ?
+AND i.estado IN ('activa','acreditada')
+");
+
+    $stmt->bind_param("ii", $alumno_id, $ciclo['id']);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
 
     if ($res['total'] >= 1) {
-        return ["ok" => false, "mensaje" => "Ya tienes un taller de este tipo"];
+        return ["ok" => false, "mensaje" => "Solo puedes inscribirte a una actividad por semestre"];
     }
 
     // 5. CHOQUE DE HORARIO
@@ -82,6 +87,7 @@ function validarInscripcion($alumno_id, $horario_id, $conn) {
         INNER JOIN talleres t ON h.taller_id = t.id
         WHERE i.alumno_id = ?
         AND t.ciclo_id = ?
+        AND i.estado = 'activa'
     ");
     $stmt->bind_param("ii", $alumno_id, $ciclo['id']);
     $stmt->execute();
@@ -105,6 +111,7 @@ function validarInscripcion($alumno_id, $horario_id, $conn) {
         SELECT COUNT(*) as total 
         FROM inscripciones 
         WHERE horario_id = ?
+        AND estado = 'activa'
     ");
     $stmt->bind_param("i", $horario_id);
     $stmt->execute();

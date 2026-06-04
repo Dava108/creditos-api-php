@@ -15,12 +15,29 @@ $numero_control = $data["numero_control"];
 $nombre = $data["nombre"];
 $generacion_id = $data["generacion_id"];
 
+$periodo_id = isset($data["periodo_id"])
+    ? intval($data["periodo_id"])
+    : 1;
+
 $stmt = $conn->prepare("
-INSERT INTO alumnos (numero_control, nombre, generacion_id)
-VALUES (?, ?, ?)
+INSERT INTO alumnos
+(
+    numero_control,
+    nombre,
+    generacion_id,
+    periodo_id
+)
+VALUES (?, ?, ?, ?)
 ");
 
-$stmt->bind_param("ssi", $numero_control, $nombre, $generacion_id);
+$stmt->bind_param(
+    "ssii",
+    $numero_control,
+    $nombre,
+    $generacion_id,
+    $periodo_id
+);
+
 
 if($stmt->execute()){
     echo json_encode(["status" => "ok"]);

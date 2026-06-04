@@ -55,10 +55,12 @@ FROM horarios h
 
 LEFT JOIN inscripciones i 
   ON h.id = i.horario_id
+  AND i.estado = 'activa'
 
 LEFT JOIN inscripciones ia 
   ON ia.horario_id = h.id 
   AND ia.alumno_id = ?
+  AND ia.estado = 'activa'
 
 INNER JOIN talleres t 
   ON h.taller_id = t.id

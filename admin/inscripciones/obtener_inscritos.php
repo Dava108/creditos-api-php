@@ -25,16 +25,20 @@ $user = requireRole(['admin']);
 
 $horario_id = $_GET['horario_id'];
 
+
 $sql = "
 SELECT 
   a.id,
   a.nombre,
   a.numero_control,
-  c.nombre AS carrera
+  c.nombre AS carrera,
+  i.id AS inscripcion_id,
+  i.estado
 FROM inscripciones i
 INNER JOIN alumnos a ON i.alumno_id = a.id
 INNER JOIN carreras c ON a.carrera_id = c.id
 WHERE i.horario_id = ?
+AND i.estado='activa'
 ";
 
 $stmt = $conn->prepare($sql);

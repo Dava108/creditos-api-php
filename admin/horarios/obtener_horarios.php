@@ -39,14 +39,25 @@ SELECT
     h.espacio,
     h.cupo_maximo,
     h.estado,
+
     COUNT(i.id) AS inscritos
+
 FROM horarios h
-INNER JOIN talleres t ON h.taller_id = t.id
-LEFT JOIN inscripciones i ON i.horario_id = h.id
+
+INNER JOIN talleres t 
+ON h.taller_id = t.id
+
+LEFT JOIN inscripciones i 
+ON i.horario_id = h.id
+AND i.estado = 'activa'
+
 WHERE h.taller_id = ?
+
 GROUP BY h.id
+
 ORDER BY h.dia_semana, h.hora_inicio
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $taller_id);

@@ -38,8 +38,15 @@ if ($horario_id <= 0) {
 }
 
 $stmt = $conn->prepare("
-    DELETE FROM inscripciones
-    WHERE alumno_id = ? AND horario_id = ?
+    UPDATE inscripciones
+
+    SET 
+        estado = 'cancelada',
+        fecha_cancelacion = NOW()
+
+    WHERE alumno_id = ?
+    AND horario_id = ?
+    AND estado = 'activa'
 ");
 
 $stmt->bind_param("ii", $alumno_id, $horario_id);
